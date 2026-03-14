@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartTask — Intelligent To-Do List</title>
+  <meta name="description" content="A smart, animated to-do list with priorities, categories, due dates, drag & drop, and more." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+
+  <!-- Animated Background -->
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+  </div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- App Container -->
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo">
+          <i class="fa-solid fa-bolt-lightning"></i>
+          <span>SmartTask</span>
+        </div>
+        <div class="header-stats">
+          <span class="stat-badge" id="stat-today"><i class="fa-regular fa-sun"></i> <span id="today-count">0</span> Today</span>
+          <span class="stat-badge" id="stat-done"><i class="fa-solid fa-check-double"></i> <span id="done-count">0</span> Done</span>
+          <span class="stat-badge overdue" id="stat-overdue"><i class="fa-solid fa-triangle-exclamation"></i> <span id="overdue-count">0</span> Overdue</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="icon-btn" id="sort-btn" title="Sort Tasks">
+          <i class="fa-solid fa-arrow-up-wide-short"></i>
+        </button>
+        <button class="icon-btn" id="theme-btn" title="Toggle Theme">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <button class="icon-btn" id="clear-done-btn" title="Clear Completed">
+          <i class="fa-solid fa-broom"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-section">
+      <div class="progress-info">
+        <span id="progress-label">Overall Progress</span>
+        <span id="progress-percent">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+        <div class="progress-glow" id="progress-glow"></div>
+      </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="search-filter-bar">
+      <div class="search-wrapper">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="search-input" placeholder="Search tasks..." autocomplete="off" />
+        <button class="clear-search" id="clear-search" title="Clear search"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="filter-tab active" data-filter="all">All</button>
+        <button class="filter-tab" data-filter="today">Today</button>
+        <button class="filter-tab" data-filter="pending">Pending</button>
+        <button class="filter-tab" data-filter="completed">Completed</button>
+        <button class="filter-tab" data-filter="overdue">Overdue</button>
+      </div>
+    </div>
+
+    <!-- Category Chips -->
+    <div class="category-strip" id="category-strip">
+      <button class="cat-chip active" data-cat="all"><i class="fa-solid fa-border-all"></i> All</button>
+      <button class="cat-chip" data-cat="personal"><i class="fa-solid fa-user"></i> Personal</button>
+      <button class="cat-chip" data-cat="work"><i class="fa-solid fa-briefcase"></i> Work</button>
+      <button class="cat-chip" data-cat="study"><i class="fa-solid fa-book"></i> Study</button>
+      <button class="cat-chip" data-cat="health"><i class="fa-solid fa-heart-pulse"></i> Health</button>
+      <button class="cat-chip" data-cat="finance"><i class="fa-solid fa-coins"></i> Finance</button>
+      <button class="cat-chip" data-cat="shopping"><i class="fa-solid fa-cart-shopping"></i> Shopping</button>
+    </div>
+
+    <!-- Add Task Form -->
+    <div class="add-task-card" id="add-task-card">
+      <div class="add-task-header" id="add-task-toggle">
+        <div class="add-icon-wrap"><i class="fa-solid fa-plus"></i></div>
+        <span>Add New Task</span>
+        <i class="fa-solid fa-chevron-down chevron" id="add-chevron"></i>
+      </div>
+      <div class="add-task-form" id="add-task-form">
+        <div class="form-row">
+          <div class="form-group flex-3">
+            <label for="task-title">Task Title *</label>
+            <input type="text" id="task-title" placeholder="What needs to be done?" maxlength="120" />
+          </div>
+          <div class="form-group flex-1">
+            <label for="task-priority">Priority</label>
+            <select id="task-priority">
+              <option value="low">🟢 Low</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="high">🔴 High</option>
+              <option value="urgent">🚨 Urgent</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="task-notes">Notes (optional)</label>
+            <input type="text" id="task-notes" placeholder="Add a note or description..." maxlength="200" />
+          </div>
+          <div class="form-group flex-1">
+            <label for="task-category">Category</label>
+            <select id="task-category">
+              <option value="personal">👤 Personal</option>
+              <option value="work">💼 Work</option>
+              <option value="study">📚 Study</option>
+              <option value="health">❤️ Health</option>
+              <option value="finance">💰 Finance</option>
+              <option value="shopping">🛒 Shopping</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label for="task-due">Due Date</label>
+            <input type="date" id="task-due" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="task-subtasks">Sub-tasks (comma separated)</label>
+            <input type="text" id="task-subtasks" placeholder="e.g. Research, Draft, Review" />
+          </div>
+          <div class="form-group flex-1 form-actions">
+            <button class="btn-add-task" id="btn-add-task">
+              <i class="fa-solid fa-plus"></i> Add Task
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sort Dropdown (hidden by default) -->
+    <div class="sort-dropdown" id="sort-dropdown">
+      <div class="sort-option" data-sort="created-desc"><i class="fa-solid fa-calendar-plus"></i> Newest First</div>
+      <div class="sort-option" data-sort="created-asc"><i class="fa-solid fa-calendar-minus"></i> Oldest First</div>
+      <div class="sort-option" data-sort="due-asc"><i class="fa-solid fa-clock"></i> Due Date (Soonest)</div>
+      <div class="sort-option" data-sort="priority-desc"><i class="fa-solid fa-fire"></i> Priority (High → Low)</div>
+      <div class="sort-option" data-sort="alpha-asc"><i class="fa-solid fa-arrow-down-a-z"></i> Alphabetical</div>
+    </div>
+
+    <!-- Task List -->
+    <div class="task-list-wrapper">
+      <ul class="task-list" id="task-list"></ul>
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+        <h3>All clear!</h3>
+        <p>No tasks here. Add one above to get started.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="edit-modal">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-pen-to-square"></i> Edit Task</h3>
+        <button class="modal-close" id="modal-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="edit-title">Task Title</label>
+          <input type="text" id="edit-title" maxlength="120" />
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="edit-priority">Priority</label>
+            <select id="edit-priority">
+              <option value="low">🟢 Low</option>
+              <option value="medium">🟡 Medium</option>
+              <option value="high">🔴 High</option>
+              <option value="urgent">🚨 Urgent</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label for="edit-category">Category</label>
+            <select id="edit-category">
+              <option value="personal">👤 Personal</option>
+              <option value="work">💼 Work</option>
+              <option value="study">📚 Study</option>
+              <option value="health">❤️ Health</option>
+              <option value="finance">💰 Finance</option>
+              <option value="shopping">🛒 Shopping</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label for="edit-due">Due Date</label>
+            <input type="date" id="edit-due" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-notes">Notes</label>
+          <input type="text" id="edit-notes" maxlength="200" />
+        </div>
+        <div class="form-group">
+          <label for="edit-subtasks">Sub-tasks (comma separated)</label>
+          <input type="text" id="edit-subtasks" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="modal-cancel">Cancel</button>
+        <button class="btn-primary" id="modal-save"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
